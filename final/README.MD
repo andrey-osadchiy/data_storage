@@ -252,3 +252,5 @@ ORDER BY total_profit DESC
 LIMIT 10;
 ```
 ![Скриншот](screenshots/8.png)
+
+Всё получилось. Все SQL запросы представлены здесь [тут](https://github.com/andrey-osadchiy/data_storage/tree/main/final/SQL/sql.sql)
