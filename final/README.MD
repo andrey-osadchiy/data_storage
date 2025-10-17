@@ -227,6 +227,55 @@ SELECT
     'samplesuperstore_clean' AS record_source
 FROM student34.samplesuperstore_clean;
 ```
+
+Добавим внешние ключи:
+
+```sql
+ALTER TABLE student34.lnk_sale_ctx
+  ADD CONSTRAINT fk_lnk_sale_ship_mode
+    FOREIGN KEY (hub_ship_mode_key)
+    REFERENCES student34.hub_ship_mode (hub_ship_mode_key) NOT VALID;
+
+ALTER TABLE student34.lnk_sale_ctx
+  ADD CONSTRAINT fk_lnk_sale_segment
+    FOREIGN KEY (hub_segment_key)
+    REFERENCES student34.hub_segment (hub_segment_key) NOT VALID;
+
+ALTER TABLE student34.lnk_sale_ctx
+  ADD CONSTRAINT fk_lnk_sale_location
+    FOREIGN KEY (hub_location_key)
+    REFERENCES student34.hub_location (hub_location_key) NOT VALID;
+
+ALTER TABLE student34.lnk_sale_ctx
+  ADD CONSTRAINT fk_lnk_sale_product_category
+    FOREIGN KEY (hub_product_category_key)
+    REFERENCES student34.hub_product_category (hub_product_category_key) NOT VALID;
+
+ALTER TABLE student34.sat_ship_mode_attr
+  ADD CONSTRAINT fk_sat_ship_mode_attr
+    FOREIGN KEY (hub_ship_mode_key)
+    REFERENCES student34.hub_ship_mode (hub_ship_mode_key) NOT VALID;
+
+ALTER TABLE student34.sat_segment_attr
+  ADD CONSTRAINT fk_sat_segment_attr
+    FOREIGN KEY (hub_segment_key)
+    REFERENCES student34.hub_segment (hub_segment_key) NOT VALID;
+
+ALTER TABLE student34.sat_location_attr
+  ADD CONSTRAINT fk_sat_location_attr
+    FOREIGN KEY (hub_location_key)
+    REFERENCES student34.hub_location (hub_location_key) NOT VALID;
+
+ALTER TABLE student34.sat_product_category_attr
+  ADD CONSTRAINT fk_sat_product_category_attr
+    FOREIGN KEY (hub_product_category_key)
+    REFERENCES student34.hub_product_category (hub_product_category_key) NOT VALID;
+
+ALTER TABLE student34.sat_sale_metrics
+  ADD CONSTRAINT fk_sat_sale_metrics
+    FOREIGN KEY (lnk_sale_ctx_key)
+    REFERENCES student34.lnk_sale_ctx (lnk_sale_ctx_key) NOT VALID;
+```
 ### На последнем шаге создадим ряд аналитических запросов
 Посчитаем какова средняя прибыль и скидка по сегментам клиентов
 ```sql
