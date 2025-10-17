@@ -39,3 +39,8 @@
 - SAT_SHIP_MODE_ATTR (к HUB_SHIP_MODE): хранит текстовое значение Ship Mode (как атрибут, чтобы версионировать переименования).
 - SAT_SEGMENT_ATTR (к HUB_SEGMENT): хранит текст Segment (версионирование).
 - SAT_SALE_METRICS (к LNK_SALE_CTX): фактические метрики Sales, Quantity, Discount, Profit.
+
+Общая схема будет следующей 
+![Скриншот](screenshots/hse - student34.png)
+
+
