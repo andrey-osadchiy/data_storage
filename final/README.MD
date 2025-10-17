@@ -8,5 +8,31 @@
 Создаём эндпоинты (приёмник и источник) и запускаем трансфер
 ![Скриншот](screenshots/0.png)
 
-
+По результатам анализа можно сказать следующее:
+- В датасете  присутсвует (13 колонок: Ship Mode, Segment, Country, City, State, Postal Code, Region, Category, Sub-Category, Sales, Quantity, Discount, Profit)
+- В датасете присутствуют дублирующиеся строки которые мы убрали
 Весь подробный анализ описан тут [тут](https://github.com/andrey-osadchiy/data_storage/tree/main/final/files/DataStorage.ipynb)
+### Проектирование данных.
+Ознакомившись с данными  мы можем перейти к проектирование БД.
+_Бизнес‑сущности и ключи_
+Доступные домены в файле:
+
+Доставка: Ship Mode
+
+Клиентский сегмент: Segment
+
+География: Country, State, City, Postal Code, Region
+
+Категория товара: Category, Sub-Category
+
+Факты продажи: Sales, Quantity, Discount, Profit
+
+Выбор хабов (Hubs):
+
+HUB_SHIP_MODE — бизнес‑ключ: Ship Mode
+
+HUB_SEGMENT — бизнес‑ключ: Segment
+
+HUB_LOCATION — бизнес‑ключ: конкатенация Country|State|City|Postal Code|Region
+
+HUB_PRODUCT_CATEGORY — бизнес‑ключ: Category|Sub-Category
