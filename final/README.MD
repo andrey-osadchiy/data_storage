@@ -41,6 +41,6 @@
 - SAT_SALE_METRICS (к LNK_SALE_CTX): фактические метрики Sales, Quantity, Discount, Profit.
 
 Общая схема будет следующей 
-![Скриншот](screenshots/hse - student34.png)
+![Скриншот](screenshots/34.png)
 
 
