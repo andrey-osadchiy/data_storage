@@ -21,14 +21,18 @@
 - География: Country, State, City, Postal Code, Region
 - Категория товара: Category, Sub-Category
 - Факты продажи: Sales, Quantity, Discount, Profit
+
 **Выбор хабов (Hubs):**
 - HUB_SHIP_MODE — бизнес‑ключ: Ship Mode
 - HUB_SEGMENT — бизнес‑ключ: Segment
 - HUB_LOCATION — бизнес‑ключ: конкатенация Country|State|City|Postal Code|Region
 - HUB_PRODUCT_CATEGORY — бизнес‑ключ: Category|Sub-Category
+
 **Линки (Links):**
 - LNK_SALE_CTX — связь «контекст продажи»: Ship Mode ↔ Segment ↔ Location ↔ Product Category.
+
 Бизнес‑состав ключа линка: хэш от всех соответствующих бизнес‑ключей из хабов.
+
 **Сателлиты (Satellites):**
 - SAT_LOCATION_ATTR (к HUB_LOCATION): хранит дублируемые нат‑атрибуты географии (Country, State, City, Postal Code, Region). Нужен для истории, если в исходнике поменяется, например, соответствие Postal Code ↔ City.
 - SAT_PRODUCT_CATEGORY_ATTR (к HUB_PRODUCT_CATEGORY): хранит Category, Sub-Category.
