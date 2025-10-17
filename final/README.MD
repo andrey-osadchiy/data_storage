@@ -218,3 +218,37 @@ SELECT
     'samplesuperstore_clean' AS record_source
 FROM student34.samplesuperstore_clean;
 ```
+### На последнем шаге создадим ряд аналитических запросов
+Посчитаем какова средняя прибыль и скидка по сегментам клиентов
+```sql
+SELECT
+    s.segment,
+    ROUND(SUM(m.sales), 2) AS total_sales,
+    ROUND(SUM(m.profit), 2) AS total_profit,
+    ROUND(AVG(m.discount), 3) AS avg_discount,
+    ROUND(SUM(m.profit)/NULLIF(SUM(m.sales),0)*100, 2) AS profit_margin_pct
+FROM student34.sat_sale_metrics m
+JOIN student34.lnk_sale_ctx c
+    ON m.lnk_sale_ctx_key = c.lnk_sale_ctx_key
+JOIN student34.sat_segment_attr s
+    ON c.hub_segment_key = s.hub_segment_key
+GROUP BY s.segment
+ORDER BY total_profit DESC;
+```
+![Скриншот](screenshots/7.png)
+
+Выведем Топ-10 городов по прибыли и среднему чеку
+```sql
+SELECT
+    l.city,
+    ROUND(SUM(m.sales), 2) AS total_sales,
+    ROUND(SUM(m.profit), 2) AS total_profit,
+    ROUND(AVG(m.sales / NULLIF(m.quantity, 0)), 2) AS avg_ticket
+FROM student34.sat_sale_metrics m
+JOIN student34.lnk_sale_ctx c ON m.lnk_sale_ctx_key = c.lnk_sale_ctx_key
+JOIN student34.sat_location_attr l ON c.hub_location_key = l.hub_location_key
+GROUP BY l.city
+ORDER BY total_profit DESC
+LIMIT 10;
+```
+![Скриншот](screenshots/8.png)
