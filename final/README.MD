@@ -52,3 +52,169 @@ PS. В реальном проекте мы бы выгрузили в стэд�
 ![Скриншот](screenshots/3.png)
 
 ### Создание таблиц и их наполнение
+Сначала создадим Хабы
+```sql
+-- HUB_SHIP_MODE
+CREATE TABLE IF NOT EXISTS student34.hub_ship_mode (
+    hub_ship_mode_key  CHAR(32) PRIMARY KEY,
+    ship_mode_bk       TEXT NOT NULL,
+    load_dts           TIMESTAMP NOT NULL,
+    record_source      TEXT NOT NULL
+)
+DISTRIBUTED BY (hub_ship_mode_key);
+
+-- HUB_SEGMENT
+CREATE TABLE IF NOT EXISTS student34.hub_segment (
+    hub_segment_key  CHAR(32) PRIMARY KEY,
+    segment_bk       TEXT NOT NULL,
+    load_dts         TIMESTAMP NOT NULL,
+    record_source    TEXT NOT NULL
+)
+DISTRIBUTED BY (hub_segment_key);
+
+-- HUB_LOCATION
+CREATE TABLE IF NOT EXISTS student34.hub_location (
+    hub_location_key  CHAR(32) PRIMARY KEY,
+    location_bk       TEXT NOT NULL,
+    load_dts          TIMESTAMP NOT NULL,
+    record_source     TEXT NOT NULL
+)
+DISTRIBUTED BY (hub_location_key);
+
+-- HUB_PRODUCT_CATEGORY
+CREATE TABLE IF NOT EXISTS student34.hub_product_category (
+    hub_product_category_key  CHAR(32) PRIMARY KEY,
+    product_category_bk       TEXT NOT NULL,
+    load_dts                  TIMESTAMP NOT NULL,
+    record_source             TEXT NOT NULL
+)
+DISTRIBUTED BY (hub_product_category_key);
+```
+Далее наполним их данными
+![Скриншот](screenshots/4.png)
+
+Теперь создадим линк
+```sql
+CREATE TABLE IF NOT EXISTS student34.lnk_sale_ctx (
+    lnk_sale_ctx_key          CHAR(32) PRIMARY KEY,
+    hub_ship_mode_key         CHAR(32) NOT NULL,
+    hub_segment_key           CHAR(32) NOT NULL,
+    hub_location_key          CHAR(32) NOT NULL,
+    hub_product_category_key  CHAR(32) NOT NULL,
+    load_dts                  TIMESTAMP NOT NULL,
+    record_source             TEXT NOT NULL
+)
+DISTRIBUTED BY (lnk_sale_ctx_key);
+```
+
+Заполним и его
+![Скриншот](screenshots/5.png)
+
+Остались сателлиты создадим их
+![Скриншот](screenshots/6.png)
+
+И наполним
+```sql
+INSERT INTO student34.sat_ship_mode_attr (
+    hub_ship_mode_key, hashdiff, ship_mode,
+    start_date, end_date, is_current,
+    load_dts, record_source
+)
+SELECT
+    md5(upper(trim(ship_mode))) AS hub_ship_mode_key,
+    md5(upper(trim(ship_mode))) AS hashdiff,
+    ship_mode,
+    current_date AS start_date,
+    DATE '9999-12-31' AS end_date,
+    TRUE AS is_current,
+    now() AS load_dts,
+    'samplesuperstore_clean' AS record_source
+FROM student34.samplesuperstore_clean
+WHERE ship_mode IS NOT NULL
+GROUP BY ship_mode;
+
+
+INSERT INTO student34.sat_segment_attr (
+    hub_segment_key, hashdiff, segment,
+    start_date, end_date, is_current,
+    load_dts, record_source
+)
+SELECT
+    md5(upper(trim(segment))) AS hub_segment_key,
+    md5(upper(trim(segment))) AS hashdiff,
+    segment,
+    current_date AS start_date,
+    DATE '9999-12-31' AS end_date,
+    TRUE AS is_current,
+    now() AS load_dts,
+    'samplesuperstore_clean' AS record_source
+FROM student34.samplesuperstore_clean
+WHERE segment IS NOT NULL
+GROUP BY segment;
+
+
+INSERT INTO student34.sat_location_attr (
+    hub_location_key, hashdiff,
+    country, state, city, postal_code, region,
+    start_date, end_date, is_current,
+    load_dts, record_source
+)
+SELECT
+    md5(upper(trim(concat_ws('|', country, state, city, postal_code, region)))) AS hub_location_key,
+    md5(upper(trim(concat_ws('|', country, state, city, postal_code, region)))) AS hashdiff,
+    country, state, city, postal_code, region,
+    current_date AS start_date,
+    DATE '9999-12-31' AS end_date,
+    TRUE AS is_current,
+    now() AS load_dts,
+    'samplesuperstore_clean' AS record_source
+FROM student34.samplesuperstore_clean
+GROUP BY country, state, city, postal_code, region;
+
+
+INSERT INTO student34.sat_product_category_attr (
+    hub_product_category_key, hashdiff,
+    category, sub_category,
+    start_date, end_date, is_current,
+    load_dts, record_source
+)
+SELECT
+    md5(upper(trim(concat_ws('|', category, sub_category)))) AS hub_product_category_key,
+    md5(upper(trim(concat_ws('|', category, sub_category)))) AS hashdiff,
+    category, sub_category,
+    current_date AS start_date,
+    DATE '9999-12-31' AS end_date,
+    TRUE AS is_current,
+    now() AS load_dts,
+    'samplesuperstore_clean' AS record_source
+FROM student34.samplesuperstore_clean
+GROUP BY category, sub_category;
+
+
+INSERT INTO student34.sat_sale_metrics (
+    lnk_sale_ctx_key, hashdiff,
+    sales, quantity, discount, profit,
+    start_date, end_date, is_current,
+    load_dts, record_source
+)
+SELECT
+    md5(upper(trim(concat_ws('|',
+        md5(upper(trim(ship_mode))),
+        md5(upper(trim(segment))),
+        md5(upper(trim(concat_ws('|', country, state, city, postal_code, region)))),
+        md5(upper(trim(concat_ws('|', category, sub_category))))
+    )))) AS lnk_sale_ctx_key,
+    md5(upper(trim(concat_ws('|',
+        coalesce(to_char("Sales", 'FM9999999990D0000'), 'NULL'),
+        coalesce("Quantity"::text, 'NULL'),
+        coalesce(to_char("Discount", 'FM999990D0000'), 'NULL'),
+        coalesce(to_char("Profit", 'FM9999999990D0000'), 'NULL')
+    )))) AS hashdiff,
+    "Sales", "Quantity", "Discount", "Profit",
+    current_date AS start_date,
+    DATE '9999-12-31' AS end_date,
+    TRUE AS is_current,
+    now() AS load_dts,
+    'samplesuperstore_clean' AS record_source
+FROM student34.samplesuperstore_clean;
+```
