@@ -11,6 +11,5 @@
 ### Делаем необходимые запросы
 ![Скриншот](screenshots/8.png)
 ![Скриншот](screenshots/9.png)
-Результаты запросов ([Тут](homeworks/SQL_v_Hadoop/screenshots/1.txt)) и 
-[Тут](homeworks/SQL_v_Hadoop/screenshots/2.txt)
+Результаты запросов представлены в папке files
 
