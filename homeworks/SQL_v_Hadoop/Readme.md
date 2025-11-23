@@ -13,3 +13,4 @@
 ![Скриншот](screenshots/9.png)
 Результаты запросов представлены в папке files
 
+[тут](https://github.com/andrey-osadchiy/data_storage/blob/main/homeworks/SQL_v_Hadoop/files/1.txt)
