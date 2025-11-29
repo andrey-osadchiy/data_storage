@@ -15,7 +15,15 @@ docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
 ![Скриншот](screenshots/4.png)
 ### Создаём второй поток
 ![Скриншот](screenshots/5.png)
-### CSAS — Create Stream 
+### Создаём CSAS через Create Stream 
+```sql
+CREATE STREAM PaymentPurchaseStream WITH (KAFKA_TOPIC =
+'PaymentPurchaseTopic', VALUE_FORMAT='JSON')
+AS SELECT l.id AS purchaseId, l.product, r.status
+FROM PurchaseStream l
+INNER JOIN PaymentStream r WITHIN 7 DAYS ON l.id = r.purchaseId
+EMIT CHANGES;
+```
 ![Скриншот](screenshots/6.png)
 ### Добавляем записи в потоки
 ```sql
