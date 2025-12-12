@@ -117,7 +117,7 @@ __Выбор хабов (Hubs)__
 
 ##### HUB_REGION
 - Бизнес-ключ: R_REGIONKEY
-- Почему хаб: регион — справочник.
+- Почему хаб: регион - справочник.
 
 Про PARTSUPP: его можно делать как HUB, но чаще и чище в DV: link PART↔SUPPLIER + satellite атрибутов поставки
 
@@ -125,36 +125,36 @@ __Выбор хабов (Hubs)__
 #### Линки (Links)
 
 ##### LNK_ORDER_CUSTOMER
-- Связь: ORDER ↔ CUSTOMER (из ORDERS.O_CUSTKEY)
+- Связь: ORDER <=> CUSTOMER (из ORDERS.O_CUSTKEY)
 - Бизнес-состав ключа линка: хэш от BK заказа и BK клиента
 - Смысл: фиксируем отношения “заказ принадлежит клиенту”.
 
 ##### LNK_LINEITEM_ORDER
-- Связь: LINEITEM ↔ ORDER (из LINEITEM.L_ORDERKEY)
+- Связь: LINEITEM <=> ORDER (из LINEITEM.L_ORDERKEY)
 - Смысл: строка принадлежит конкретному заказу.
 
 ##### LNK_LINEITEM_PART
-- Связь: LINEITEM ↔ PART (из LINEITEM.L_PARTKEY)
+- Связь: LINEITEM <=> PART (из LINEITEM.L_PARTKEY)
 - Смысл: строка ссылается на товар.
 
 ##### LNK_LINEITEM_SUPPLIER
-- Связь: LINEITEM ↔ SUPPLIER (из LINEITEM.L_SUPPKEY)
+- Связь: LINEITEM <=> SUPPLIER (из LINEITEM.L_SUPPKEY)
 - Смысл: строка ссылается на поставщика.
 
 ##### LNK_CUSTOMER_NATION
-- Связь: CUSTOMER ↔ NATION (из CUSTOMER.C_NATIONKEY)
+- Связь: CUSTOMER <=> NATION (из CUSTOMER.C_NATIONKEY)
 - Смысл: геопривязка клиента.
 
 ##### LNK_SUPPLIER_NATION
-- Связь: SUPPLIER ↔ NATION (из SUPPLIER.S_NATIONKEY)
+- Связь: SUPPLIER <=> NATION (из SUPPLIER.S_NATIONKEY)
 - Смысл: геопривязка поставщика.
 
 ##### LNK_NATION_REGION
-- Связь: NATION ↔ REGION (из NATION.N_REGIONKEY)
+- Связь: NATION <=> REGION (из NATION.N_REGIONKEY)
 - Смысл: иерархия географии.
 
 ##### LNK_PART_SUPPLIER
-- Связь: PART ↔ SUPPLIER (источник: PARTSUPP(PS_PARTKEY, PS_SUPPKEY))
+- Связь: PART <=> SUPPLIER (источник: PARTSUPP(PS_PARTKEY, PS_SUPPKEY))
 - Смысл: это M:N связь “поставщик поставляет товар”.
 
 #### Сателлиты (Satellites)
@@ -188,15 +188,15 @@ __Выбор хабов (Hubs)__
 
 #### Общие правила 
 __Hash-keys (hub/link)__
-- *_hk = md5(upper(trim(concat_ws('|', ...))))
+- *_hk = md5(to_utf8(upper(trim(concat_ws('|', ...)))))
 
 ##### Примеры бизнес-состава:
-- customer_hk = md5( upper(trim(cast(C_CUSTKEY as varchar))) )
-- link_order_customer_hk = md5( upper(trim(concat_ws('|', O_ORDERKEY, C_CUSTKEY))) )
-- lineitem_hk = md5( upper(trim(concat_ws('|', L_ORDERKEY, L_LINENUMBER))) )
+- customer_hk = md5( to_utf8(upper(trim(cast(C_CUSTKEY as varchar))) ))
+- link_order_customer_hk = md5( to_utf8(upper(trim(concat_ws('|', O_ORDERKEY, C_CUSTKEY)))) )
+- lineitem_hk = md5( to_utf8(upper(trim(concat_ws('|', L_ORDERKEY, L_LINENUMBER)))) )
 
 ##### Hashdiff в сателлитах
-- hashdiff = md5(upper(trim(concat_ws('|', <все атрибуты версии> ))))
+- hashdiff = md5(upper(to_utf8(trim(concat_ws('|', <все атрибуты версии> )))))
 - Используем для детекта изменений и SCD2.
 
 ##### SCD2 во всех SAT
@@ -998,7 +998,93 @@ WHERE o.orderdate = DATE '${run_date}'
 
 Логика:
 1. Берём все старые строки SAT.
-2. Если строка current и по этому order_hk пришла новая версия с другим hashdiff → “закрываем” её (end_date = run_date-1, is_current=false).
+2. Если строка current и по этому order_hk пришла новая версия с другим hashdiff => “закрываем” её (end_date = run_date-1, is_current=false).
 3. Добавляем “новые версии” для:
 - новых order_hk (не было current)
 - или изменившихся (hashdiff другой)
+
+```sql
+DROP TABLE IF EXISTS memory.dds.sat_order_attr_new;
+
+CREATE TABLE memory.dds.sat_order_attr_new AS
+WITH src AS (
+  SELECT
+    md5(to_utf8(upper(trim(cast(o.orderkey as varchar))))) AS order_hk,
+    o.orderstatus, o.totalprice, o.orderdate, o.orderpriority, o.clerk, o.shippriority, o.comment,
+    md5(to_utf8(upper(trim(concat_ws('|',
+      coalesce(o.orderstatus,''),
+      cast(coalesce(o.totalprice, 0.0) as varchar),
+      cast(o.orderdate as varchar),
+      coalesce(o.orderpriority,''),
+      coalesce(o.clerk,''),
+      cast(coalesce(o.shippriority, 0) as varchar),
+      coalesce(o.comment,'')
+    ))))) AS hashdiff
+  FROM tpch.tiny.orders o
+  WHERE o.orderdate = DATE '1996-01-01'
+),
+closed_old AS (
+  SELECT
+    t.order_hk,
+    t.o_orderstatus, t.o_totalprice, t.o_orderdate, t.o_orderpriority, t.o_clerk, t.o_shippriority, t.o_comment,
+    t.hashdiff,
+    t.start_date,
+    CASE
+      WHEN t.is_current = true
+           AND s.order_hk IS NOT NULL
+           AND t.hashdiff <> s.hashdiff
+      THEN date_add('day', -1, DATE '1996-01-01')
+      ELSE t.end_date
+    END AS end_date,
+    CASE
+      WHEN t.is_current = true
+           AND s.order_hk IS NOT NULL
+           AND t.hashdiff <> s.hashdiff
+      THEN false
+      ELSE t.is_current
+    END AS is_current,
+    current_timestamp AS navi_date,
+    t.record_source
+  FROM memory.dds.sat_order_attr t
+  LEFT JOIN src s
+    ON s.order_hk = t.order_hk
+),
+new_versions AS (
+  SELECT
+    s.order_hk,
+    s.orderstatus AS o_orderstatus,
+    s.totalprice  AS o_totalprice,
+    s.orderdate   AS o_orderdate,
+    s.orderpriority AS o_orderpriority,
+    s.clerk       AS o_clerk,
+    s.shippriority AS o_shippriority,
+    s.comment     AS o_comment,
+    s.hashdiff,
+    DATE '1996-01-01' AS start_date,
+    DATE '9999-12-31' AS end_date,
+    true AS is_current,
+    current_timestamp AS navi_date,
+    'tpch.tiny.orders' AS record_source
+  FROM src s
+  LEFT JOIN memory.dds.sat_order_attr cur
+    ON cur.order_hk = s.order_hk AND cur.is_current = true
+  WHERE cur.order_hk IS NULL OR cur.hashdiff <> s.hashdiff
+)
+SELECT * FROM closed_old
+UNION ALL
+SELECT * FROM new_versions;
+```
+
+![Скриншот](screenshots/31.png)
+
+
+И теперь заменяем старую на новую
+```sql
+DROP TABLE memory.dds.sat_order_attr;
+ALTER TABLE memory.dds.sat_order_attr_new RENAME TO sat_order_attr;
+```
+![Скриншот](screenshots/32.png)
+
+
+К сожалению, TPC-H — статичный датасет, изменения атрибутов не моделируются, поэтому в реальном прогоне нет записей у которых end_date боьше текущей даты
+![Скриншот](screenshots/33.png)
