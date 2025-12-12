@@ -1103,7 +1103,6 @@ ALTER TABLE memory.dds.sat_order_attr_new RENAME TO sat_order_attr;
 - Также была продемонстрирована загрузка данных день, где дата была передана как параметр
 
 Общая схема получилась следующей:
-![Скриншот](screenshots/dia.png)
 ```mermaid
 erDiagram
   HUB_CUSTOMER {
