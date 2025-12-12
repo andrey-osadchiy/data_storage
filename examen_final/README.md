@@ -15,6 +15,9 @@
 
 ### Анализ действующих таблиц
 Смотрим на таблицы в схеме tiny 
+
 ![Скриншот](screenshots/3.png)
+
 Cхема описна [тут](https://www.tpc.org/TPC_Documents_Current_Versions/pdf/TPC-H_v3.0.1.pdf) 
+
 ![Скриншот](screenshots/8.png)
