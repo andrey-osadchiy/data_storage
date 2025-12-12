@@ -1102,7 +1102,7 @@ ALTER TABLE memory.dds.sat_order_attr_new RENAME TO sat_order_attr;
 - В каталоге memory была создана схема memory.dds где все таблицы были созданы и наполнены. Также были сделаны ряд аналитических запросов
 - Также была продемонстрирована загрузка данных день, где дата была передана как параметр
 
-Все SQL запросы лежат тут
 Общая схема получилась следующей:
-
 ![Скриншот](screenshots/dia.png)
+
+PS. Все SQL запросы представлены здесь [тут](https://github.com/andrey-osadchiy/data_storage/blob/main/examen_final/sql/sql.sql)
