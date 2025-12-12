@@ -21,3 +21,53 @@
 Cхема описна [тут](https://www.tpc.org/TPC_Documents_Current_Versions/pdf/TPC-H_v3.0.1.pdf) 
 
 ![Скриншот](screenshots/8.png)
+
+#### Таблица CUSTOMER - потребители 
+![Скриншот](screenshots/5.png)
+![Скриншот](screenshots/7.png)
+- таблица представляем собой справочник потребителей.
+
+#### Таблица SUPPLIER - поставщики 
+![Скриншот](screenshots/9.png)
+![Скриншот](screenshots/10.png)
+- таблица представляем собой справочник поставщиков.
+
+#### Таблица PART - товары
+![Скриншот](screenshots/11.png)
+![Скриншот](screenshots/12.png)
+- в таблице представлен справочник товаров
+
+#### Таблица PARTSUPP - поставщик–товар
+![Скриншот](screenshots/13.png)
+![Скриншот](screenshots/14.png)
+- в таблице представлены атрибуты поставки
+
+#### Таблица ORDERS - заказы
+![Скриншот](screenshots/15.png)
+![Скриншот](screenshots/16.png)
+- в таблице представлены заказы. В файле описания указано, что не у всех клиентов есть заказы (часть клиентов “мертвые” для join’ов) — это заложено специально.
+
+#### Таблица LINEITEM - спецификация заказа
+![Скриншот](screenshots/17.png)
+![Скриншот](screenshots/18.png)
+- в таблцие представлены строки заказа 
+
+#### Таблица NATION - страны
+![Скриншот](screenshots/19.png)
+![Скриншот](screenshots/20.png)
+- в таблцие представлен справочник стран
+
+#### Таблица REGION - REGION
+![Скриншот](screenshots/21.png)
+![Скриншот](screenshots/22.png)
+- в таблцие представлен справочник REGION
+
+Если одной строкой, то связи такие:
+	•	CUSTOMER.C_NATIONKEY → NATION.N_NATIONKEY  ￼
+	•	SUPPLIER.S_NATIONKEY → NATION.N_NATIONKEY  ￼
+	•	NATION.N_REGIONKEY → REGION.R_REGIONKEY  ￼
+	•	ORDERS.O_CUSTKEY → CUSTOMER.C_CUSTKEY  ￼
+	•	PARTSUPP.PS_PARTKEY → PART.P_PARTKEY, PARTSUPP.PS_SUPPKEY → SUPPLIER.S_SUPPKEY  ￼
+	•	LINEITEM.L_ORDERKEY → ORDERS.O_ORDERKEY, LINEITEM.L_PARTKEY → PART.P_PARTKEY, LINEITEM.L_SUPPKEY → SUPPLIER.S_SUPPKEY, (L_PARTKEY,L_SUPPKEY) → PARTSUPP 
+
+  
