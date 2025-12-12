@@ -13,7 +13,7 @@
 Запускаем к базе через бобра. Делаем тестовый запрос
 ![Скриншот](screenshots/2.png)
 
-### Анализ действующих таблиц
+### 1. Анализ действующих таблиц
 Смотрим на таблицы в схеме tiny 
 
 ![Скриншот](screenshots/3.png)
@@ -30,7 +30,7 @@ Cхема описна [тут](https://www.tpc.org/TPC_Documents_Current_Versio
 #### Таблица SUPPLIER - поставщики 
 ![Скриншот](screenshots/9.png)
 ![Скриншот](screenshots/10.png)
-- таблица представляем собой справочник поставщиков.
+- таблица представляет собой справочник поставщиков.
 
 #### Таблица PART - товары
 ![Скриншот](screenshots/11.png)
@@ -63,11 +63,60 @@ Cхема описна [тут](https://www.tpc.org/TPC_Documents_Current_Versio
 - в таблцие представлен справочник REGION
 
 Если одной строкой, то связи такие:
-	•	CUSTOMER.C_NATIONKEY → NATION.N_NATIONKEY  ￼
-	•	SUPPLIER.S_NATIONKEY → NATION.N_NATIONKEY  ￼
-	•	NATION.N_REGIONKEY → REGION.R_REGIONKEY  ￼
-	•	ORDERS.O_CUSTKEY → CUSTOMER.C_CUSTKEY  ￼
-	•	PARTSUPP.PS_PARTKEY → PART.P_PARTKEY, PARTSUPP.PS_SUPPKEY → SUPPLIER.S_SUPPKEY  ￼
-	•	LINEITEM.L_ORDERKEY → ORDERS.O_ORDERKEY, LINEITEM.L_PARTKEY → PART.P_PARTKEY, LINEITEM.L_SUPPKEY → SUPPLIER.S_SUPPKEY, (L_PARTKEY,L_SUPPKEY) → PARTSUPP 
+- CUSTOMER.C_NATIONKEY => NATION.N_NATIONKEY  ￼
+- SUPPLIER.S_NATIONKEY => NATION.N_NATIONKEY  ￼
+- NATION.N_REGIONKEY => REGION.R_REGIONKEY  ￼
+- ORDERS.O_CUSTKEY => CUSTOMER.C_CUSTKEY  ￼
+- PARTSUPP.PS_PARTKEY => PART.P_PARTKEY, PARTSUPP.PS_SUPPKEY => SUPPLIER.S_SUPPKEY  ￼
+- LINEITEM.L_ORDERKEY => ORDERS.O_ORDERKEY, LINEITEM.L_PARTKEY => PART.P_PARTKEY, LINEITEM.L_SUPPKEY => SUPPLIER.S_SUPPKEY, (L_PARTKEY,L_SUPPKEY) => PARTSUPP 
 
+### 2. Проектирование данных.
+Ознакомившись с данными мы можем перейти к проектирование БД.
+
+#### Бизнес‑сущности и ключи
+Доступные домены (из исходных таблиц TPC-H)
+
+__Справочники/мастера__:
+- Клиенты: CUSTOMER
+- Поставщики: SUPPLIER
+- Товары: PART
+- География: REGION, NATION (и ссылки на них из customer/supplier)
+- Заказы (шапка): ORDERS
+- Позиции заказа: LINEITEM
+- Связь товар–поставщик + атрибуты поставки: PARTSUPP
+
+__Факты/метрики (числовые показатели)__:
+- По заказу: O_TOTALPRICE
+- По позиции: L_QUANTITY, L_EXTENDEDPRICE, L_DISCOUNT, L_TAX
   
+__Выбор хабов (Hubs)__
+
+__HUB_CUSTOMER__
+- Бизнес-ключ: C_CUSTKEY
+- Почему хаб: клиент — независимая сущность.
+
+__HUB_SUPPLIER__
+- Бизнес-ключ: S_SUPPKEY
+- Почему хаб: поставщик — независимая сущность.
+
+__HUB_PART__
+- Бизнес-ключ: P_PARTKEY
+- Почему хаб: товар/деталь — независимая сущность.
+
+__HUB_ORDER__
+- Бизнес-ключ: O_ORDERKEY
+- Почему хаб: заказ — сущность “шапка документа”.
+
+__HUB_LINEITEM__
+- Бизнес-ключ (составной): L_ORDERKEY | L_LINENUMBER
+- Почему хаб: позиция заказа — “строка документа” (часто моделируют как отдельную сущность, потому что у строки много атрибутов и дат).
+
+__HUB_NATION__
+- Бизнес-ключ: N_NATIONKEY
+- Почему хаб: страна — справочник.
+
+__HUB_REGION__
+- Бизнес-ключ: R_REGIONKEY
+- Почему хаб: регион — справочник.
+
+__Про PARTSUPP: его можно делать как HUB, но чаще и чище в DV: link PART↔SUPPLIER + satellite атрибутов поставки__ 
