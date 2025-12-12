@@ -1104,5 +1104,234 @@ ALTER TABLE memory.dds.sat_order_attr_new RENAME TO sat_order_attr;
 
 Общая схема получилась следующей:
 ![Скриншот](screenshots/dia.png)
+```mermaid
+erDiagram
+  HUB_CUSTOMER {
+    VARBINARY customer_hk
+    VARCHAR customer_bk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
 
+  HUB_SUPPLIER {
+    VARBINARY supplier_hk
+    VARCHAR supplier_bk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  HUB_PART {
+    VARBINARY part_hk
+    VARCHAR part_bk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  HUB_ORDER {
+    VARBINARY order_hk
+    VARCHAR order_bk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  HUB_LINEITEM {
+    VARBINARY lineitem_hk
+    VARCHAR lineitem_bk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  HUB_NATION {
+    VARBINARY nation_hk
+    VARCHAR nation_bk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  HUB_REGION {
+    VARBINARY region_hk
+    VARCHAR region_bk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_ORDER_CUSTOMER {
+    VARBINARY lnk_hk
+    VARBINARY order_hk
+    VARBINARY customer_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_LINEITEM_ORDER {
+    VARBINARY lnk_hk
+    VARBINARY lineitem_hk
+    VARBINARY order_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_LINEITEM_PART {
+    VARBINARY lnk_hk
+    VARBINARY lineitem_hk
+    VARBINARY part_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_LINEITEM_SUPPLIER {
+    VARBINARY lnk_hk
+    VARBINARY lineitem_hk
+    VARBINARY supplier_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_CUSTOMER_NATION {
+    VARBINARY lnk_hk
+    VARBINARY customer_hk
+    VARBINARY nation_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_SUPPLIER_NATION {
+    VARBINARY lnk_hk
+    VARBINARY supplier_hk
+    VARBINARY nation_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_NATION_REGION {
+    VARBINARY lnk_hk
+    VARBINARY nation_hk
+    VARBINARY region_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  LNK_PART_SUPPLIER {
+    VARBINARY lnk_hk
+    VARBINARY part_hk
+    VARBINARY supplier_hk
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_CUSTOMER_ATTR {
+    VARBINARY customer_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_SUPPLIER_ATTR {
+    VARBINARY supplier_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_PART_ATTR {
+    VARBINARY part_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_ORDER_ATTR {
+    VARBINARY order_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_LINEITEM_ATTR {
+    VARBINARY lineitem_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_NATION_ATTR {
+    VARBINARY nation_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_REGION_ATTR {
+    VARBINARY region_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  SAT_PART_SUPPLIER_ATTR {
+    VARBINARY lnk_hk
+    VARBINARY hashdiff
+    DATE start_date
+    DATE end_date
+    BOOLEAN is_current
+    TIMESTAMP navi_date
+    VARCHAR record_source
+  }
+
+  %% Relationships (logical)
+  HUB_CUSTOMER ||--o{ LNK_ORDER_CUSTOMER : customer_hk
+  HUB_ORDER    ||--o{ LNK_ORDER_CUSTOMER : order_hk
+
+  HUB_LINEITEM ||--o{ LNK_LINEITEM_ORDER : lineitem_hk
+  HUB_ORDER    ||--o{ LNK_LINEITEM_ORDER : order_hk
+
+  HUB_LINEITEM ||--o{ LNK_LINEITEM_PART : lineitem_hk
+  HUB_PART     ||--o{ LNK_LINEITEM_PART : part_hk
+
+  HUB_LINEITEM ||--o{ LNK_LINEITEM_SUPPLIER : lineitem_hk
+  HUB_SUPPLIER ||--o{ LNK_LINEITEM_SUPPLIER : supplier_hk
+
+  HUB_CUSTOMER ||--o{ LNK_CUSTOMER_NATION : customer_hk
+  HUB_NATION   ||--o{ LNK_CUSTOMER_NATION : nation_hk
+
+  HUB_SUPPLIER ||--o{ LNK_SUPPLIER_NATION : supplier_hk
+  HUB_NATION   ||--o{ LNK_SUPPLIER_NATION : nation_hk
+
+  HUB_NATION   ||--o{ LNK_NATION_REGION : nation_hk
+  HUB_REGION   ||--o{ LNK_NATION_REGION : region_hk
+
+  HUB_PART     ||--o{ LNK_PART_SUPPLIER : part_hk
+  HUB_SUPPLIER ||--o{ LNK_PART_SUPPLIER : supplier_hk
+
+  HUB_CUSTOMER ||--o{ SAT_CUSTOMER_ATTR : has
+  HUB_SUPPLIER ||--o{ SAT_SUPPLIER_ATTR : has
+  HUB_PART     ||--o{ SAT_PART_ATTR : has
+  HUB_ORDER    ||--o{ SAT_ORDER_ATTR : has
+  HUB_LINEITEM ||--o{ SAT_LINEITEM_ATTR : has
+  HUB_NATION   ||--o{ SAT_NATION_ATTR : has
+  HUB_REGION   ||--o{ SAT_REGION_ATTR : has
+
+  LNK_PART_SUPPLIER ||--o{ SAT_PART_SUPPLIER_ATTR : has
+```
 PS. Все SQL запросы представлены здесь [тут](https://github.com/andrey-osadchiy/data_storage/blob/main/examen_final/sql/sql.sql)
