@@ -85,104 +85,104 @@ __Справочники/мастера__:
 - Позиции заказа: LINEITEM
 - Связь товар–поставщик + атрибуты поставки: PARTSUPP
 
-__Факты/метрики (числовые показатели)__:
+#### Факты/метрики (числовые показатели):
 - По заказу: O_TOTALPRICE
 - По позиции: L_QUANTITY, L_EXTENDEDPRICE, L_DISCOUNT, L_TAX
   
 __Выбор хабов (Hubs)__
 
-__HUB_CUSTOMER__
+##### HUB_CUSTOMER
 - Бизнес-ключ: C_CUSTKEY
 - Почему хаб: клиент — независимая сущность.
 
-__HUB_SUPPLIER__
+##### HUB_SUPPLIER
 - Бизнес-ключ: S_SUPPKEY
 - Почему хаб: поставщик — независимая сущность.
 
-__HUB_PART__
+##### HUB_PART
 - Бизнес-ключ: P_PARTKEY
 - Почему хаб: товар/деталь — независимая сущность.
 
-__HUB_ORDER__
+##### HUB_ORDER
 - Бизнес-ключ: O_ORDERKEY
 - Почему хаб: заказ — сущность “шапка документа”.
 
-__HUB_LINEITEM__
+##### HUB_LINEITEM
 - Бизнес-ключ (составной): L_ORDERKEY | L_LINENUMBER
 - Почему хаб: позиция заказа — “строка документа” (часто моделируют как отдельную сущность, потому что у строки много атрибутов и дат).
 
-__HUB_NATION__
+##### HUB_NATION
 - Бизнес-ключ: N_NATIONKEY
 - Почему хаб: страна — справочник.
 
-__HUB_REGION__
+##### HUB_REGION
 - Бизнес-ключ: R_REGIONKEY
 - Почему хаб: регион — справочник.
 
-__Про PARTSUPP: его можно делать как HUB, но чаще и чище в DV: link PART↔SUPPLIER + satellite атрибутов поставки__ 
+Про PARTSUPP: его можно делать как HUB, но чаще и чище в DV: link PART↔SUPPLIER + satellite атрибутов поставки
 
 
-__Линки (Links)__
+#### Линки (Links)
 
-__LNK_ORDER_CUSTOMER__
+##### LNK_ORDER_CUSTOMER
 - Связь: ORDER ↔ CUSTOMER (из ORDERS.O_CUSTKEY)
 - Бизнес-состав ключа линка: хэш от BK заказа и BK клиента
 - Смысл: фиксируем отношения “заказ принадлежит клиенту”.
 
-__LNK_LINEITEM_ORDER__
+##### LNK_LINEITEM_ORDER
 - Связь: LINEITEM ↔ ORDER (из LINEITEM.L_ORDERKEY)
 - Смысл: строка принадлежит конкретному заказу.
 
-__LNK_LINEITEM_PART__
+##### LNK_LINEITEM_PART
 - Связь: LINEITEM ↔ PART (из LINEITEM.L_PARTKEY)
 - Смысл: строка ссылается на товар.
 
-__LNK_LINEITEM_SUPPLIER__
+##### LNK_LINEITEM_SUPPLIER
 - Связь: LINEITEM ↔ SUPPLIER (из LINEITEM.L_SUPPKEY)
 - Смысл: строка ссылается на поставщика.
 
-__LNK_CUSTOMER_NATION__
+##### LNK_CUSTOMER_NATION
 - Связь: CUSTOMER ↔ NATION (из CUSTOMER.C_NATIONKEY)
 - Смысл: геопривязка клиента.
 
-__LNK_SUPPLIER_NATION__
+##### LNK_SUPPLIER_NATION
 - Связь: SUPPLIER ↔ NATION (из SUPPLIER.S_NATIONKEY)
 - Смысл: геопривязка поставщика.
 
-__LNK_NATION_REGION__
+##### LNK_NATION_REGION
 - Связь: NATION ↔ REGION (из NATION.N_REGIONKEY)
 - Смысл: иерархия географии.
 
-__LNK_PART_SUPPLIER__
+##### LNK_PART_SUPPLIER
 - Связь: PART ↔ SUPPLIER (источник: PARTSUPP(PS_PARTKEY, PS_SUPPKEY))
 - Смысл: это M:N связь “поставщик поставляет товар”.
 
-__Сателлиты (Satellites)__
+#### Сателлиты (Satellites)
 
-__SAT_CUSTOMER_ATTR (к HUB_CUSTOMER)__
+##### SAT_CUSTOMER_ATTR (к HUB_CUSTOMER)
 - Атрибуты: C_NAME, C_ADDRESS, C_PHONE, C_ACCTBAL, C_MKTSEGMENT, C_COMMENT
 - (NATIONKEY лучше не хранить тут как атрибут, а связью через LNK_CUSTOMER_NATION)
 
-__SAT_SUPPLIER_ATTR (к HUB_SUPPLIER)__
+##### SAT_SUPPLIER_ATTR (к HUB_SUPPLIER)
 - Атрибуты: S_NAME, S_ADDRESS, S_PHONE, S_ACCTBAL, S_COMMENT
 
-__SAT_PART_ATTR (к HUB_PART)__
+##### SAT_PART_ATTR (к HUB_PART)
 - Атрибуты: P_NAME, P_MFGR, P_BRAND, P_TYPE, P_SIZE, P_CONTAINER, P_RETAILPRICE, P_COMMENT
 
-__SAT_ORDER_ATTR (к HUB_ORDER)__
+##### SAT_ORDER_ATTR (к HUB_ORDER)
 - Атрибуты: O_ORDERSTATUS, O_TOTALPRICE, O_ORDERDATE, O_ORDERPRIORITY, O_CLERK, O_SHIPPRIORITY, O_COMMENT
 - Тут же обычно удобно держать O_ORDERDATE как “бизнес-дату” для инкрементальной загрузки.
 
-__SAT_LINEITEM_ATTR (к HUB_LINEITEM)__
+##### SAT_LINEITEM_ATTR (к HUB_LINEITEM)
 - Атрибуты: L_QUANTITY, L_EXTENDEDPRICE, L_DISCOUNT, L_TAX, L_RETURNFLAG, L_LINESTATUS, L_SHIPDATE, L_COMMITDATE, L_RECEIPTDATE, L_SHIPINSTRUCT, L_SHIPMODE, L_COMMENT
 
-__SAT_NATION_ATTR (к HUB_NATION)__
+##### SAT_NATION_ATTR (к HUB_NATION)
 - Атрибуты: N_NAME, N_COMMENT
 
-__SAT_REGION_ATTR (к HUB_REGION)__
+##### SAT_REGION_ATTR (к HUB_REGION)
 - Атрибуты: R_NAME, R_COMMENT
 
-__SAT_PART_SUPPLIER_ATTR (к LNK_PART_SUPPLIER)__
+##### SAT_PART_SUPPLIER_ATTR (к LNK_PART_SUPPLIER)
 - Атрибуты связи поставки: PS_AVAILQTY, PS_SUPPLYCOST, PS_COMMENT
 - Это прямой аналог твоего SAT_SALE_METRICS, только для “связи поставки”.
 
@@ -190,16 +190,16 @@ __SAT_PART_SUPPLIER_ATTR (к LNK_PART_SUPPLIER)__
 __Hash-keys (hub/link)__
 - *_hk = md5(upper(trim(concat_ws('|', ...))))
 
-__Примеры бизнес-состава__:
+##### Примеры бизнес-состава:
 - customer_hk = md5( upper(trim(cast(C_CUSTKEY as varchar))) )
 - link_order_customer_hk = md5( upper(trim(concat_ws('|', O_ORDERKEY, C_CUSTKEY))) )
 - lineitem_hk = md5( upper(trim(concat_ws('|', L_ORDERKEY, L_LINENUMBER))) )
 
-__Hashdiff в сателлитах__
+##### Hashdiff в сателлитах
 - hashdiff = md5(upper(trim(concat_ws('|', <все атрибуты версии> ))))
 - Используем для детекта изменений и SCD2.
 
-__SCD2 во всех SAT__
+##### SCD2 во всех SAT
 Обязательные поля в каждом SAT:
 | Поле | Назначение  |
 |--------------|--------------|
